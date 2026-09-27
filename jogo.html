@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jogo de Arqueologia Interativa</title>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: Arial, sans-serif; overflow: hidden; background-color: #2c3e50; }
+        #container { display: flex; width: 100vw; height: 100vh; }
+        
+        /* Painel Lateral */
+        #painel-esquerda { width: 30%; min-width: 320px; background-color: #ffffff; box-shadow: 4px 0 15px rgba(0,0,0,0.3); z-index: 20; display: flex; flex-direction: column; box-sizing: border-box; }
+        .topo-painel { padding: 20px; background-color: #f8f9fa; border-bottom: 2px solid #e9ecef; }
+        h2 { margin: 0; color: #2c3e50; font-size: 1.4rem; }
+        p { margin: 5px 0 0 0; color: #7f8c8d; font-size: 0.9rem; }
+        #menu-epocas { flex-grow: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        
+        details { background-color: #34495e; border-radius: 8px; margin-bottom: 5px; }
+        summary { padding: 15px; color: white; font-weight: bold; cursor: pointer; user-select: none; }
+        .conteudo-epoca { background-color: #ffffff; padding: 15px; display: flex; flex-direction: column; gap: 8px; border: 2px solid #34495e; border-top: none; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
+        .subperiodo-titulo { font-size: 0.95rem; font-weight: bold; color: #e67e22; margin: 5px 0 2px 0; text-transform: uppercase; }
+        
+        /* Botões Próprios para Ecrãs Táteis */
+        .objeto-btn { 
+            background: #f1f3f5; padding: 15px; border: 2px solid #dee2e6; border-radius: 8px; 
+            cursor: pointer; text-align: left; font-size: 1.1rem; font-weight: bold; width: 100%; 
+            display: block; box-sizing: border-box; 
+            user-select: none; -webkit-user-select: none;
+            touch-action: manipulation; /* Evita que o Windows confunda o toque com gestos de arrastar */
+        }
+        .objeto-btn.selecionado { background-color: #ffe066; border-color: #f59f00; }
+        .vazio { color: #aaa; font-style: italic; font-size: 0.9rem; padding-left: 5px; }
+        
+        /* Caixa Informativa Inferior */
+        #caixa-info { display: none; background-color: #f8f9fa; border-top: 4px solid #1abc9c; padding: 15px; min-height: 120px; box-sizing: border-box; }
+        #info-icone { font-size: 3rem; float: left; margin-right: 15px; line-height: 1; }
+        #caixa-info h3 { margin: 0 0 5px 0; color: #2c3e50; font-size: 1.2rem; }
+        #caixa-info p { color: #333; font-size: 1rem; margin: 4px 0; }
+        
+        /* Área do Mapa Fixo e Blindado */
+        #area-mapa { flex-grow: 1; height: 100%; position: relative; background-color: #34495e; overflow: hidden; }
+        #cenario-jogo { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background-image: url('mapa.jpg'); 
+            background-color: #bdc3c7; /* Fundo cinzento caso o ficheiro mapa.jpg falhe */
+            background-size: contain; background-repeat: no-repeat; background-position: center; 
+        }
+        
+        /* Pontos Geográficos */
+        .ponto { position: absolute; width: 26px; height: 26px; border: 4px solid white; border-radius: 50%; transform: translate(-50%, -50%); display: none; z-index: 99; box-shadow: 0 0 12px rgba(0,0,0,0.4); }
+        #ponto-achado { background-color: #e74c3c; }
+        #ponto-origem { background-color: #2980b9; }
+        .ponto-rotulo { position: absolute; background: rgba(0,0,0,0.85); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.82rem; font-weight: bold; white-space: nowrap; transform: translate(-50%, -160%); pointer-events: none; }
+        
+        /* Linhas SVG */
+        #linhas-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 90; }
+        .linha-jogo { stroke: #e74c3c; stroke-width: 5; stroke-dasharray: 10; animation: andarTracejado 2s linear infinite; }
+        @keyframes andarTracejado { to { stroke-dashoffset: -40; } }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <!-- Painel Esquerdo -->
+        <div id="painel-esquerda">
+            <div class="topo-painel">
+                <h2>Arqueologia Interativa</h2>
+                <p>Toque num objeto para ver no mapa:</p>
+            </div>
+            <div id="menu-epocas">
+                
+                <!-- 1. PRÉ-HISTÓRIA -->
+                <details>
+                    <summary>🦴 Pré-História</summary>
+                    <div class="conteudo-epoca">
+                        <div class="subperiodo-titulo">Paleolítico</div>
+                        <!-- Ligação direta via onclick nativo purificado -->
+                        <button class="objeto-btn" onclick="processarToque('biface', this)">🪓 Biface</button>
+                        <button class="objeto-btn" onclick="processarToque('venus', this)">🗿 Vénus de Willendorf</button>
+                        <div class="subperiodo-titulo">Neolítico</div><div class="vazio">(Sem objetos)</div>
+                        <div class="subperiodo-titulo">Idade do Cobre</div><div class="vazio">(Sem objetos)</div>
+                        <div class="subperiodo-titulo">Idade do Bronze</div><div class="vazio">(Sem objetos)</div>
+                    </div>
+                </details>
+
+                <!-- 2. PROTO-HISTÓRIA -->
+                <details><summary>🛡️ Proto-História / Idade do Ferro</summary><div class="conteudo-epoca"><div class="vazio">(Sem objetos)</div></div></details>
+
+                <!-- 3. ÉPOCA ROMANA -->
+                <details>
+                    <summary>🏛️ Época Romana</summary>
+                    <div class="conteudo-epoca">
+                        <button class="objeto-btn" onclick="processarToque('lucerna', this)">🪔 Lucerna</button>
+                    </div>
+                </details>
+
+                <!-- 4. IDADE MÉDIA -->
+                <details>
+                    <summary>🏰 Idade Média</summary>
+                    <div class="conteudo-epoca">
+                        <button class="objeto-btn" onclick="processarToque('vidro', this)">🍷 Vidro de Guifões</button>
+                    </div>
+                </details>
+
+                <!-- 5. IDADE MODERNA -->
+                <details><summary>⛵ Idade Moderna</summary><div class="conteudo-epoca"><div class="vazio">(Sem objetos)</div></div></details>
+                <!-- 6. ÉPOCA CONTEMPORÂNEA -->
+                <details><summary>🏭 Época Contemporânea</summary><div class="conteudo-epoca"><div class="vazio">(Sem objetos)</div></div></details>
+            </div>
+            
+            <!-- CAIXA INFORMATIVA INFERIOR -->
+            <div id="caixa-info">
+                <div id="info-icone">❓</div>
+                <h3 id="info-nome">-</h3>
+                <p>📍 <b>Achado:</b> <span id="info-achado">-</span></p>
+                <p>🌍 <b>Origem:</b> <span id="info-origem">-</span></p>
+            </div>
+        </div>
+        
+        <!-- Área Direita do Mapa -->
+        <div id="area-mapa">
+            <div id="cenario-jogo">
+                <svg id="linhas-svg"></svg>
+                <div id="ponto-achado" class="ponto"><div class="ponto-rotulo" id="rotulo-achado">Local do Achado</div></div>
+                <div id="ponto-origem" class="ponto"><div class="ponto-rotulo" id="rotulo-origem">Local de Origem</div></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var objetoAtivo = null;
+
+        function processarToque(idObjeto, elementoBotao) {
+            objetoAtivo = idObjeto;
+            var svg = document.getElementById('linhas-svg');
+            var ptAchado = document.getElementById('ponto-achado');
+            var ptOrigem = document.getElementById('ponto-origem');
+            var caixaInfo = document.getElementById('caixa-info');
+            
+            // Destacar o botão visualmente
+            var botoes = document.querySelectorAll('.objeto-btn');
+            for(var i=0; i<botoes.length; i++) { botoes[i].className = 'objeto-btn'; }
+            elementoBotao.className = 'objeto-btn selecionado';
+            
+            // Limpar estados antigos do mapa
+            svg.innerHTML = '';
+            ptAchado.style.display = 'none';
+            ptOrigem.style.display = 'none';
+            
+            var nome="", achado="", origem="", icone="", ex=0, ey=0, ox=0, oy=0;
+            
+            // Filtro direto de dados
+            if (idObjeto === 'biface') {
+                nome="Biface"; achado="Lisboa"; origem="Norte de África"; icone="🪓"; ex=25; ey=55; ox=45; oy=75;
+            } else if (idObjeto === 'venus') {
+                nome="Vénus de Willendorf"; achado="Willendorf (Áustria)"; origem="Willendorf (Áustria)"; icone="🗿"; ex=62; ey=35; ox=62; oy=35;
+            } else if (idObjeto === 'lucerna') {
+                nome="Lucerna Romana"; achado="Lisboa"; origem="Norte de África"; icone="🪔"; ex=25; ey=55; ox=50; oy=80;
+            } else if (idObjeto === 'vidro') {
+                nome="Vidro de Guifões"; achado="Matosinhos"; origem="Norte da Alemanha"; icone="🍷"; ex=23; ey=45; ox=58; oy=25;
+            }
+            
+            // Inserir dados na barra lateral
+            document.getElementById('info-icone').innerText = icone;
+            document.getElementById('info-nome').innerText = nome;
+            document.getElementById('info-achado').innerText = achado;
+            document.getElementById('info-origem').innerText = origem;
+            caixaInfo.style.display = 'block';
+
+            // Posicionar Ponto Vermelho (Achado)
+            ptAchado.style.left = ex + '%';
+            ptAchado.style.top = ey + '%';
+            ptAchado.style.display = 'block';
+            document.getElementById('rotulo-achado').innerText = "Achado: " + achado;
+
+
+
+
+        
+
+
+
+            
