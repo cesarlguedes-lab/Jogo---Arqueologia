@@ -20,7 +20,7 @@
         .conteudo-epoca { background-color: #ffffff; padding: 15px; display: flex; flex-direction: column; gap: 8px; border: 2px solid #34495e; border-top: none; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
         .subperiodo-titulo { font-size: 0.95rem; font-weight: bold; color: #e67e22; margin: 5px 0 2px 0; text-transform: uppercase; }
         
-        /* Botões Adaptados para o Ecrã Tátil do Surface */
+        /* Botões Próprios para Ecrãs Táteis */
         .objeto-btn { 
             background: #f1f3f5; padding: 15px; border: 2px solid #dee2e6; border-radius: 8px; 
             cursor: pointer; text-align: left; font-size: 1.1rem; font-weight: bold; width: 100%; 
@@ -37,12 +37,12 @@
         #caixa-info h3 { margin: 0 0 5px 0; color: #2c3e50; font-size: 1.2rem; }
         #caixa-info p { color: #333; font-size: 1rem; margin: 4px 0; }
         
-        /* Área do Mapa */
+        /* Área do Mapa Fixo e Blindado */
         #area-mapa { flex-grow: 1; height: 100%; position: relative; background-color: #34495e; overflow: hidden; }
         #cenario-jogo { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             background-image: url('mapa.jpg'); 
-            background-color: #e5e3df; /* Plano B visual */
+            background-color: #bdc3c7; 
             background-size: contain; background-repeat: no-repeat; background-position: center; 
         }
         
@@ -107,6 +107,7 @@
                 <details><summary>🏭 Época Contemporânea</summary><div class="conteudo-epoca"><div class="vazio">(Sem objetos)</div></div></details>
             </div>
             
+            <!-- CAIXA INFORMATIVA INFERIOR -->
             <div id="caixa-info">
                 <div id="media-container"><img id="info-imagem" src="" alt="Objeto"></div>
                 <h3 id="info-nome">-</h3>
@@ -145,13 +146,13 @@
             
             var nome="", achado="", origem="", imagem="", ex=0, ey=0, ox=0, oy=0;
             
-            // Dados Oficiais Fornecidos
+            // CORRIGIDO: Nomes ajustados rigorosamente iguais aos seus arquivos do GitHub
             if (idObjeto === 'biface') {
                 nome="Biface"; achado="Lisboa"; origem="Norte de África"; imagem="Biface.jpg"; ex=25; ey=55; ox=45; oy=75;
             } else if (idObjeto === 'venus') {
-                nome="Vénus de Willendorf"; achado="Willendorf (Áustria)"; origem="Willendorf (Áustria)"; imagem="venus.jpg"; ex=62; ey=35; ox=62; oy=35;
+                nome="Vénus de Willendorf"; achado="Willendorf (Áustria)"; origem="Willendorf (Áustria)"; imagem="Venus.jpg"; ex=62; ey=35; ox=62; oy=35;
             } else if (idObjeto === 'lucerna') {
-                nome="Lucerna Romana"; achado="Lisboa"; origem="Norte de África"; imagem="Lucerna.jpg"; ex=25; ey=55; ox=50; oy=80;
+                nome="Lucerna Romana"; achado="Lisboa"; origem="Norte de África"; imagem="lucerna.jpg"; ex=25; ey=55; ox=50; oy=80;
             } else if (idObjeto === 'vidro') {
                 nome="Vidro de Guifões"; achado="Matosinhos"; origem="Norte da Alemanha"; imagem="Vidro.jpg"; ex=23; ey=45; ox=58; oy=25;
             }
@@ -170,4 +171,4 @@
             if (ex !== ox || ey !== oy) {
                 ptOrigem.style.left = ox + '%';
                 ptOrigem.style.top = oy + '%';
-                ptOrigem.style.display = 'block';
+
