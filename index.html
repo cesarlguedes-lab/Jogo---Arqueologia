@@ -20,29 +20,29 @@
         .conteudo-epoca { background-color: #ffffff; padding: 15px; display: flex; flex-direction: column; gap: 8px; border: 2px solid #34495e; border-top: none; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
         .subperiodo-titulo { font-size: 0.95rem; font-weight: bold; color: #e67e22; margin: 5px 0 2px 0; text-transform: uppercase; }
         
-        /* Botões Próprios para Ecrãs Táteis */
+        /* Botões Adaptados para o Ecrã Tátil do Surface */
         .objeto-btn { 
             background: #f1f3f5; padding: 15px; border: 2px solid #dee2e6; border-radius: 8px; 
             cursor: pointer; text-align: left; font-size: 1.1rem; font-weight: bold; width: 100%; 
-            display: block; box-sizing: border-box; 
-            user-select: none; -webkit-user-select: none;
-            touch-action: manipulation; /* Evita que o Windows confunda o toque com gestos de arrastar */
+            display: block; box-sizing: border-box; user-select: none; -webkit-user-select: none;
+            touch-action: manipulation;
         }
         .objeto-btn.selecionado { background-color: #ffe066; border-color: #f59f00; }
         .vazio { color: #aaa; font-style: italic; font-size: 0.9rem; padding-left: 5px; }
         
         /* Caixa Informativa Inferior */
         #caixa-info { display: none; background-color: #f8f9fa; border-top: 4px solid #1abc9c; padding: 15px; min-height: 120px; box-sizing: border-box; }
-        #info-icone { font-size: 3rem; float: left; margin-right: 15px; line-height: 1; }
+        #media-container { width: 80px; height: 80px; float: left; margin-right: 15px; border-radius: 8px; border: 2px solid #ddd; overflow: hidden; }
+        #info-imagem { width: 100%; height: 100%; object-fit: cover; }
         #caixa-info h3 { margin: 0 0 5px 0; color: #2c3e50; font-size: 1.2rem; }
         #caixa-info p { color: #333; font-size: 1rem; margin: 4px 0; }
         
-        /* Área do Mapa Fixo e Blindado */
+        /* Área do Mapa */
         #area-mapa { flex-grow: 1; height: 100%; position: relative; background-color: #34495e; overflow: hidden; }
         #cenario-jogo { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             background-image: url('mapa.jpg'); 
-            background-color: #bdc3c7; /* Fundo cinzento caso o ficheiro mapa.jpg falhe */
+            background-color: #e5e3df; /* Plano B visual */
             background-size: contain; background-repeat: no-repeat; background-position: center; 
         }
         
@@ -74,7 +74,6 @@
                     <summary>🦴 Pré-História</summary>
                     <div class="conteudo-epoca">
                         <div class="subperiodo-titulo">Paleolítico</div>
-                        <!-- Ligação direta via onclick nativo purificado -->
                         <button class="objeto-btn" onclick="processarToque('biface', this)">🪓 Biface</button>
                         <button class="objeto-btn" onclick="processarToque('venus', this)">🗿 Vénus de Willendorf</button>
                         <div class="subperiodo-titulo">Neolítico</div><div class="vazio">(Sem objetos)</div>
@@ -108,9 +107,8 @@
                 <details><summary>🏭 Época Contemporânea</summary><div class="conteudo-epoca"><div class="vazio">(Sem objetos)</div></div></details>
             </div>
             
-            <!-- CAIXA INFORMATIVA INFERIOR -->
             <div id="caixa-info">
-                <div id="info-icone">❓</div>
+                <div id="media-container"><img id="info-imagem" src="" alt="Objeto"></div>
                 <h3 id="info-nome">-</h3>
                 <p>📍 <b>Achado:</b> <span id="info-achado">-</span></p>
                 <p>🌍 <b>Origem:</b> <span id="info-origem">-</span></p>
@@ -137,47 +135,39 @@
             var ptOrigem = document.getElementById('ponto-origem');
             var caixaInfo = document.getElementById('caixa-info');
             
-            // Destacar o botão visualmente
             var botoes = document.querySelectorAll('.objeto-btn');
             for(var i=0; i<botoes.length; i++) { botoes[i].className = 'objeto-btn'; }
             elementoBotao.className = 'objeto-btn selecionado';
             
-            // Limpar estados antigos do mapa
             svg.innerHTML = '';
             ptAchado.style.display = 'none';
             ptOrigem.style.display = 'none';
             
-            var nome="", achado="", origem="", icone="", ex=0, ey=0, ox=0, oy=0;
+            var nome="", achado="", origem="", imagem="", ex=0, ey=0, ox=0, oy=0;
             
-            // Filtro direto de dados
+            // Dados Oficiais Fornecidos
             if (idObjeto === 'biface') {
-                nome="Biface"; achado="Lisboa"; origem="Norte de África"; icone="🪓"; ex=25; ey=55; ox=45; oy=75;
+                nome="Biface"; achado="Lisboa"; origem="Norte de África"; imagem="Biface.jpg"; ex=25; ey=55; ox=45; oy=75;
             } else if (idObjeto === 'venus') {
-                nome="Vénus de Willendorf"; achado="Willendorf (Áustria)"; origem="Willendorf (Áustria)"; icone="🗿"; ex=62; ey=35; ox=62; oy=35;
+                nome="Vénus de Willendorf"; achado="Willendorf (Áustria)"; origem="Willendorf (Áustria)"; imagem="venus.jpg"; ex=62; ey=35; ox=62; oy=35;
             } else if (idObjeto === 'lucerna') {
-                nome="Lucerna Romana"; achado="Lisboa"; origem="Norte de África"; icone="🪔"; ex=25; ey=55; ox=50; oy=80;
+                nome="Lucerna Romana"; achado="Lisboa"; origem="Norte de África"; imagem="Lucerna.jpg"; ex=25; ey=55; ox=50; oy=80;
             } else if (idObjeto === 'vidro') {
-                nome="Vidro de Guifões"; achado="Matosinhos"; origem="Norte da Alemanha"; icone="🍷"; ex=23; ey=45; ox=58; oy=25;
+                nome="Vidro de Guifões"; achado="Matosinhos"; origem="Norte da Alemanha"; imagem="Vidro.jpg"; ex=23; ey=45; ox=58; oy=25;
             }
             
-            // Inserir dados na barra lateral
-            document.getElementById('info-icone').innerText = icone;
+            document.getElementById('info-imagem').src = imagem;
             document.getElementById('info-nome').innerText = nome;
             document.getElementById('info-achado').innerText = achado;
             document.getElementById('info-origem').innerText = origem;
             caixaInfo.style.display = 'block';
 
-            // Posicionar Ponto Vermelho (Achado)
             ptAchado.style.left = ex + '%';
             ptAchado.style.top = ey + '%';
             ptAchado.style.display = 'block';
             document.getElementById('rotulo-achado').innerText = "Achado: " + achado;
 
-
-
-
-        
-
-
-
-            
+            if (ex !== ox || ey !== oy) {
+                ptOrigem.style.left = ox + '%';
+                ptOrigem.style.top = oy + '%';
+                ptOrigem.style.display = 'block';
